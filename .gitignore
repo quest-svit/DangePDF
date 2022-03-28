@@ -1,0 +1,4 @@
+pyvenv/
+docs/
+.vscode/
+src/__pycache__/
