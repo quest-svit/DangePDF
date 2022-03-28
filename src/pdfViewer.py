@@ -3,7 +3,7 @@ import PyPDF2
 from tkinter import *
 from tkinter import filedialog
 from pdf2image import convert_from_path
-import mytkPDFViewer as pdf
+import tkPDFViewer as pdf
 
 #Create an instance of tkinter frame
 win= Tk()
