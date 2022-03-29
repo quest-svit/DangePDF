@@ -1,0 +1,5 @@
+PyPDF2==1.26.0
+Click==7.0
+PyMuPDF==1.19.6
+pdf2image==1.16.0
+tkPDFViewer==0.1
