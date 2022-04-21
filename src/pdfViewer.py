@@ -6,7 +6,8 @@ import fitz
 from tkinter import *
 from tkinter import filedialog, simpledialog, messagebox
 from pdf2image import convert_from_path
-from diff import findPattern
+from encrypt_utils import EncryptUtils
+from pattern import find_pattern
 import mytkPDFViewer as pdf
 import os
 import fnmatch 
@@ -17,7 +18,7 @@ import sql_utils
 #Create an instance of tkinter frame
 win= Tk()
 win.geometry("768x1024")
-win.title('Simple PDF Viewer')
+win.title('Dange PDF Viewer')
 
 # Creating the frame for PDF Viewer
 pdf_frame = Frame(win)
@@ -29,22 +30,26 @@ scrol_y = Scrollbar(pdf_frame,orient=VERTICAL)
 # Setting the scrollbar to the right side
 scrol_y.pack(side=RIGHT,fill=Y)
 
-# set global variable v2
-global pdf_frame2,zoomDPI,zoomDPIdefault,file
+# set global variables
+global pdf_frame2, zoomDPI, zoomDPIdefault, file
 pdf_frame2 = None
-zoomDPI,zoomDPIdefault=72,72
+zoomDPI, zoomDPIdefault=72,72
 file = None
+sql_utils=sql_utils.SqlUtils()
+TMP_FOLDER="/var/tmp/"
 
-#Define a function to clear the frame
 def clear_frame():
-   for widgets in pdf_frame.winfo_children():
-      widgets.destroy()
+    ''' Define a function to clear the frame '''
+
+    for widgets in pdf_frame.winfo_children():
+        widgets.destroy()
 
 def choose_file():
     return filedialog.askopenfilename(title="Select a PDF", filetypes=(("PDF Files","*.pdf"),("All Files","*.*")))
 
-#Define a function to open the pdf file
 def open_pdf(filename=None):
+    '''Function to open the pdf file '''
+
     global file, pdf_frame2
    
     if pdf_frame.winfo_exists():
@@ -59,28 +64,25 @@ def open_pdf(filename=None):
     if file:
         try:
             open_pdf= fitz.open(file)
-            open_pdf[0]
-            v1 = pdf.ShowPdf()
+            open_pdf[0]  # IF file is encrypted then this line will throw ValueError
+            pdf_frame2=display_pdf_file()
 
-            # Adding pdf location and width and height.
-            pdf_frame2 = v1.pdf_view(pdf_frame,
-                        pdf_location = file, 
-                        width = 1500, height = 2000, zoomDPI=zoomDPIdefault)
-
-        except ValueError as ve:
+        except ValueError:
             password=check_password(file)
             file= decrypt_pdf(file,password)
-            v1 = pdf.ShowPdf()
-
-            # Adding pdf location and width and height.
-            pdf_frame2 = v1.pdf_view(pdf_frame,
-                        pdf_location = file, 
-                        width = 1500, height = 2000, zoomDPI=zoomDPIdefault)
+            pdf_frame2=display_pdf_file()
 
         # Placing Pdf in my gui.
         pdf_frame2.pack()
 
     mainloop()
+
+def display_pdf_file():
+    global file, pdf_frame
+
+    return pdf.ShowPdf().pdf_view(pdf_frame,
+                        pdf_location = file, 
+                        width = 1500, height = 2000, zoomDPI=zoomDPIdefault)
 
 def check_password(filename):
 
@@ -94,21 +96,18 @@ def check_password(filename):
                                         prompt="Input the password:",  show='*')
 
 def save_password(filepath,password):
-    print("filepath in save password " + filepath)
     f_name= os.path.basename(filepath)
-    print("f_name in save password " + f_name)
-
 
     for elem in sql_utils.get_all_filenames():
-        pattern = findPattern(f_name, elem)
-        print(pattern)
+        pattern = find_pattern(f_name, elem)
+        
         if pattern is not None:
             sql_utils.insert_into_pattern(pattern,password)
     sql_utils.insert_into_file(os.path.basename(f_name),password)
 
 
 def decrypt_pdf(filename,password):
-    new_pdf_file = '/var/tmp/test.pdf'
+    new_pdf_file = TMP_FOLDER+EncryptUtils.random_filename_generator()+".pdf"
     pdf_reader = PyPDF2.PdfFileReader(filename)
     pdf_writer = PyPDF2.PdfFileWriter()
 
