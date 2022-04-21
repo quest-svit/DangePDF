@@ -10,14 +10,8 @@ from diff import findPattern
 import mytkPDFViewer as pdf
 import os
 import fnmatch 
-
-password_dict={
-
-}
-
-file_dict={
-
-}
+import sys
+import sql_utils
 
 
 #Create an instance of tkinter frame
@@ -39,6 +33,7 @@ scrol_y.pack(side=RIGHT,fill=Y)
 global pdf_frame2,zoomDPI,zoomDPIdefault,file
 pdf_frame2 = None
 zoomDPI,zoomDPIdefault=72,72
+file = None
 
 #Define a function to clear the frame
 def clear_frame():
@@ -49,15 +44,19 @@ def choose_file():
     return filedialog.askopenfilename(title="Select a PDF", filetypes=(("PDF Files","*.pdf"),("All Files","*.*")))
 
 #Define a function to open the pdf file
-def open_pdf():
-   global file,pdf_frame2
+def open_pdf(filename=None):
+    global file, pdf_frame2
    
-   if pdf_frame.winfo_exists():
-      clear_frame()
-      pdf.ShowPdf().img_object_li.clear()
+    if pdf_frame.winfo_exists():
+        clear_frame()
+        pdf.ShowPdf().img_object_li.clear()
 
-   file=choose_file()
-   if file:  
+    if filename is None:
+        file=choose_file()
+    else:
+        file=filename
+
+    if file:
         try:
             open_pdf= fitz.open(file)
             open_pdf[0]
@@ -67,7 +66,7 @@ def open_pdf():
             pdf_frame2 = v1.pdf_view(pdf_frame,
                         pdf_location = file, 
                         width = 1500, height = 2000, zoomDPI=zoomDPIdefault)
-      
+
         except ValueError as ve:
             password=check_password(file)
             file= decrypt_pdf(file,password)
@@ -81,15 +80,15 @@ def open_pdf():
         # Placing Pdf in my gui.
         pdf_frame2.pack()
 
-        mainloop()
+    mainloop()
 
 def check_password(filename):
 
     f_name= os.path.basename(filename)
     
-    for pattern in password_dict.keys():
+    for pattern in sql_utils.get_all_patterns():
         if  fnmatch.fnmatch(f_name, pattern):
-            return password_dict[pattern]
+            return sql_utils.get_password_for_pattern(pattern)
     else: 
         return simpledialog.askstring(title="Password",
                                         prompt="Input the password:",  show='*')
@@ -99,17 +98,13 @@ def save_password(filepath,password):
     f_name= os.path.basename(filepath)
     print("f_name in save password " + f_name)
 
-    print("password dict")
-    print(password_dict)
-    print("file  dict")
-    print(file_dict)
 
-    for elem in file_dict:
+    for elem in sql_utils.get_all_filenames():
         pattern = findPattern(f_name, elem)
         print(pattern)
         if pattern is not None:
-            password_dict[pattern]=password
-    file_dict[os.path.basename(f_name)]=password
+            sql_utils.insert_into_pattern(pattern,password)
+    sql_utils.insert_into_file(os.path.basename(f_name),password)
 
 
 def decrypt_pdf(filename,password):
@@ -135,10 +130,6 @@ def decrypt_pdf(filename,password):
 
 # Define function to Quit the window
 def quit_app():
-    print("password dict")
-    print(password_dict)
-    print("file  dict")
-    print(file_dict)
     win.destroy()
 
 
@@ -227,12 +218,19 @@ my_menu.add_cascade(label="File",menu= file_menu)
 my_menu.add_cascade(label="Edit",menu= edit_menu)
 
 file_menu.add_command(label="Open",command=open_pdf)
-file_menu.add_command(label="Clear",command=clear_frame)
+file_menu.add_command(label="Close",command=clear_frame)
 file_menu.add_command(label="Quit",command=quit_app)
 
 edit_menu.add_command(label="ZoomIn",command=zoomIn)
 edit_menu.add_command(label="ZoomOut",command=zoomOut)
 edit_menu.add_command(label="ZoomRestore",command=zoomRestore)
 
+    
+if len(sys.argv) == 2:
+    filename = os.getcwd()+ "/" + sys.argv[1]
+else:
+    filename = None
+
+open_pdf(filename)
 
 win.mainloop()
