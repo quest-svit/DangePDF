@@ -1,20 +1,15 @@
 #Import the required Libraries
-from operator import contains
-import PyPDF2
-from click import password_option
-import fitz
+import PyPDF2, fitz
+import mytkPDFViewer as pdf
+import os, sys, fnmatch , tempfile
+import sql_utils, logging_handler
 from tkinter import *
 from tkinter import filedialog, simpledialog, messagebox
 from pdf2image import convert_from_path
 from encrypt_utils import EncryptUtils
 from pattern import find_pattern
-import mytkPDFViewer as pdf
-import os
-import fnmatch 
-import sys
-import sql_utils
-import platform
-import tempfile
+from operator import contains
+from click import password_option
 
 #Create an instance of tkinter frame
 win= Tk()
@@ -37,8 +32,8 @@ pdf_frame2 = None
 zoomDPI, zoomDPIdefault=72,72
 file = None
 sql_utils=sql_utils.SqlUtils()
-TMP_FOLDER=tempfile.gettempdir()
-
+TMP_FOLDER=tempfile.gettempdir()+"/"
+log=logging_handler.create_logging_handler()
 
 def clear_frame():
     ''' Define a function to clear the frame '''

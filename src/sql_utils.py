@@ -2,10 +2,13 @@
 import sqlite3
 import os, platform
 from encrypt_utils import EncryptUtils
+import logging_handler
 
 FILE_PROTOCOL="file://"
 FILE_NAME='/pdfViewer.db'
 CONFIG_FOLDER_NAME='/.dange-pdf'
+log=logging_handler.create_logging_handler()
+
 
 if (platform.system() == 'Linux' or platform.system() == 'Darwin'):
     if not os.path.exists(os.path.expanduser('~')+ CONFIG_FOLDER_NAME):
@@ -19,6 +22,7 @@ else:
     pass
 
 #databaseFile='.dange-pdf/test-pdfviewer.db'
+
 
 class SqlUtils():
 
@@ -35,7 +39,7 @@ class SqlUtils():
     def create_tables(self):
         '''Creates tables FILE and PATTERN if they dont exists in database'''
 
-        print(self.databseFile)
+        log.info(self.databseFile)
         conn = sqlite3.connect(self.databseFile)
 
         conn.execute('''CREATE TABLE if not exists PATTERN 
@@ -70,10 +74,10 @@ class SqlUtils():
             data_tuple = (filename, password_encrypted)
             conn.execute(query_string,data_tuple)
             conn.commit()
-            print("Records inserted successfully")
+            log.info("Records inserted successfully")
             conn.close()
         except sqlite3.IntegrityError:
-            print("Filename already exists in database. Ignoring")
+            log.info("Filename already exists in database. Ignoring")
 
 
     def get_all_files_data(self):
@@ -122,10 +126,10 @@ class SqlUtils():
             data_tuple = (pattern, password_encrypted)
             conn.execute(query_string, data_tuple)
             conn.commit()
-            print("Records inserted successfully")
+            log.info("Records inserted successfully")
             conn.close()
         except sqlite3.IntegrityError:
-            print("Pattern already exists in database. Ignoring")
+            log.info("Pattern already exists in database. Ignoring")
 
 
     def get_all_patterns_data(self):
@@ -170,10 +174,10 @@ def test_sql_utils():
     sql_utils.drop_tables()
     sql_utils.create_tables()
     sql_utils.insert_into_file('Statement_2022MTH01_140526881.pdf', 'abc123')
-    print(sql_utils.get_all_files_data())
+    log.info(sql_utils.get_all_files_data())
     result = sql_utils.get_password_for_file('Statement_2022MTH01_140526881.pdf')
     if result is not None:
-        print(result)
+        log.info(result)
 
     sql_utils.insert_into_pattern('Statement_*.pdf', 'abc123')
     sql_utils.insert_into_pattern('*Statement_2022MTH0*.pdf', 'abc123')
@@ -181,12 +185,12 @@ def test_sql_utils():
 
     # Printing all Patterns in the database
     for pat in sql_utils.get_all_patterns():
-        print(pat)
+        log.info(pat)
 
     # Fetching Password for a given pattern
     result = sql_utils.get_password_for_pattern('Statement_*.pdf')
     if result is not None:
-        print(result)
+        log.info(result)
     
 if __name__ == "__main__":
     test_sql_utils()

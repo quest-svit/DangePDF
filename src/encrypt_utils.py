@@ -5,6 +5,7 @@ import json
 import random
 import pyaes, pbkdf2, binascii, os, secrets
 import os.path,platform
+import logging_handler
 
 ENCODING_UTF_8='utf-8'
 JSON_KEY_KEY = "key"
@@ -12,6 +13,9 @@ JSON_KEY_IV = "iv"
 CONFIG_FOLDER_NAME='/.dange-pdf'
 FILE_PROTOCOL="file://"
 SETTINGS_FILE_NAME = "/settings.json"
+log=logging_handler.create_logging_handler()
+
+
 
 if (platform.system() == 'Linux' or platform.system() == 'Darwin'):
     if not os.path.exists(os.path.expanduser('~')+ CONFIG_FOLDER_NAME):
@@ -26,18 +30,17 @@ else:
 
 
 
-
 class EncryptUtils(object):
 
     def __init__(self):
-        print(SETTINGS_FILE)
+        log.debug(SETTINGS_FILE)
         if os.path.exists(SETTINGS_FILE):
-            print("Loading settings.json")
+            log.info("Loading settings.json")
             settings = self.load_settings_from_json()
             self.key = self.decode_key_from_json(settings[JSON_KEY_KEY])
             self.iv=settings[JSON_KEY_IV]
         else:
-            print("Settings.json doesn't exist. Initializing Encryption.")
+            log.info("Settings.json doesn't exist. Initializing Encryption.")
             self.initialize_encryption()
 
     def create_encryption_key(self,password):
@@ -106,7 +109,7 @@ class EncryptUtils(object):
         settings[JSON_KEY_KEY]= self.encode_for_json_compatibility()
         settings[JSON_KEY_IV]= self.iv
 
-        print(SETTINGS_FILE)
+        log.info(SETTINGS_FILE)
         with open(SETTINGS_FILE, "w") as outfile:
             json.dump(settings, outfile ,indent=4) 
 
@@ -128,7 +131,7 @@ def test_encrypt_utils():
     ciphertext=encrypt_util.encrypt(plaintext)
 
     decrypted = encrypt_util.decrypt(ciphertext)
-    print('Decrypted:', decrypted)
+    log.info('Decrypted:', decrypted)
 
 
   
