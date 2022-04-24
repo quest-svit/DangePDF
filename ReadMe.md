@@ -1,26 +1,21 @@
-COVID PLOT
+# DANGE-PDF
 
-Corona Tracker Python App
+PDF Reader with a built in Password Manager.
 
+Almost all the banks and financial institutions send users the transaction statements in PDF format which are encrypted with a password for security purposes.
+As a user, when we check emails and view these statements they are typically downloaded into "Downloads" folder of PC/System.
 
-Covid Plot is a python based App which can plot the counts of Active , Recovered and Death cases due to COVID-19 in the selected country.
+A typical download folder has many PDF files and its not easy to identify them by filenames and which password to use to unlock them in future.
 
-It can plot different Plots like - Bar Chart, Pie Chart, Horizontal Bar Chart, Box Plot and Area Plot.
+Dange-PDF  attempts to solve this very problem. It has a built-in a password manager for the PDF and a predictive alorithm so that you don't need to try out several of the passwords in order to open the document which savea time and effort and makes docment viewing less stressful.
 
-It uses data from Johns Hopkins University CSSE Data at
-https://github.com/CSSEGISandData/COVID-19
+## Features
+* Built-in Password Manager
+* Uses Predictve Algorithm to identify the file and use exisiting Password from the database
+* Requires minimum of two user entered password for training.
+* All Passwords are encrypted with AES-256 Alogrithm
+* Compatible with Windows and Linux.
 
+## Python Version:
+* Python 3.8.0
 
-Python Version:
-Python 2.7.17 and Python 3.6.9
-
-
-How to use?
-1. Download the data file from the above github repository for the date you want to plot.
-2. Save it in the data folder
-3. Edit the name of the file -
-    pd.read_csv('../data/corona_Tracker_09-24-2020.csv')
-4. Run from the src folder
-    python webserver.py
-5. Open webbrowser
-    http://0.0.0.0:8080/
