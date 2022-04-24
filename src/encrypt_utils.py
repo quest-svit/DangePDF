@@ -4,16 +4,33 @@ import base64
 import json
 import random
 import pyaes, pbkdf2, binascii, os, secrets
-import os.path
+import os.path,platform
 
 ENCODING_UTF_8='utf-8'
 JSON_KEY_KEY = "key"
 JSON_KEY_IV = "iv"
-SETTINGS_FILE = ".dange-pdf/settings.json"
+CONFIG_FOLDER_NAME='/.dange-pdf'
+FILE_PROTOCOL="file://"
+SETTINGS_FILE_NAME = "/settings.json"
+
+if (platform.system() == 'Linux' or platform.system() == 'Darwin'):
+    if not os.path.exists(os.path.expanduser('~')+ CONFIG_FOLDER_NAME):
+        os.makedirs(os.path.expanduser('~')+ CONFIG_FOLDER_NAME)
+    SETTINGS_FILE=os.path.expanduser('~')+ CONFIG_FOLDER_NAME + SETTINGS_FILE_NAME
+elif platform.system() == 'Windows':
+    if not os.path.exists(os.path.expandvars(R"% HOMEPATH %")+ CONFIG_FOLDER_NAME):
+        os.makedirs(os.path.expandvars(R"% HOMEPATH %")+ CONFIG_FOLDER_NAME)
+    SETTINGS_FILE=os.path.expandvars(R"% HOMEPATH %")+ CONFIG_FOLDER_NAME + SETTINGS_FILE_NAME
+else:
+    pass
+
+
+
 
 class EncryptUtils(object):
 
     def __init__(self):
+        print(SETTINGS_FILE)
         if os.path.exists(SETTINGS_FILE):
             print("Loading settings.json")
             settings = self.load_settings_from_json()
@@ -89,6 +106,7 @@ class EncryptUtils(object):
         settings[JSON_KEY_KEY]= self.encode_for_json_compatibility()
         settings[JSON_KEY_IV]= self.iv
 
+        print(SETTINGS_FILE)
         with open(SETTINGS_FILE, "w") as outfile:
             json.dump(settings, outfile ,indent=4) 
 

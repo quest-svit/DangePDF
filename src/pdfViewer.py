@@ -13,7 +13,8 @@ import os
 import fnmatch 
 import sys
 import sql_utils
-
+import platform
+import tempfile
 
 #Create an instance of tkinter frame
 win= Tk()
@@ -36,7 +37,8 @@ pdf_frame2 = None
 zoomDPI, zoomDPIdefault=72,72
 file = None
 sql_utils=sql_utils.SqlUtils()
-TMP_FOLDER="/var/tmp/"
+TMP_FOLDER=tempfile.gettempdir()
+
 
 def clear_frame():
     ''' Define a function to clear the frame '''

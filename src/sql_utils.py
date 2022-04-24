@@ -1,12 +1,24 @@
 #!/usr/bin/python
 import sqlite3
-import os
+import os, platform
 from encrypt_utils import EncryptUtils
 
 FILE_PROTOCOL="file://"
 FILE_NAME='/pdfViewer.db'
-databseFile=FILE_PROTOCOL+os.path.expanduser('~')+ FILE_NAME
-databaseFile='.dange-pdf/test-pdfviewer.db'
+CONFIG_FOLDER_NAME='/.dange-pdf'
+
+if (platform.system() == 'Linux' or platform.system() == 'Darwin'):
+    if not os.path.exists(os.path.expanduser('~')+ CONFIG_FOLDER_NAME):
+        os.makedirs(os.path.expanduser('~')+ CONFIG_FOLDER_NAME)
+    databaseFile=os.path.expanduser('~')+ CONFIG_FOLDER_NAME + FILE_NAME
+elif platform.system() == 'Windows':
+    if not os.path.exists(os.path.expandvars(R"% HOMEPATH %")+ CONFIG_FOLDER_NAME):
+        os.makedirs(os.path.expandvars(R"% HOMEPATH %")+ CONFIG_FOLDER_NAME)
+    databaseFile=os.path.expandvars(R"% HOMEPATH %")+ CONFIG_FOLDER_NAME + FILE_NAME
+else:
+    pass
+
+#databaseFile='.dange-pdf/test-pdfviewer.db'
 
 class SqlUtils():
 
@@ -23,6 +35,7 @@ class SqlUtils():
     def create_tables(self):
         '''Creates tables FILE and PATTERN if they dont exists in database'''
 
+        print(self.databseFile)
         conn = sqlite3.connect(self.databseFile)
 
         conn.execute('''CREATE TABLE if not exists PATTERN 
